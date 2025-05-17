@@ -11,6 +11,14 @@ interface UserProps {
 }
 
 export class User extends Entity<UserProps> {
+  get name() {
+    return this.props.name;
+  }
+
+  get email() {
+    return this.props.email;
+  }
+
   static create(props: UserProps, id?: UniqueEntityId) {
     const user = new User(
       {
