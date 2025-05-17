@@ -6,6 +6,8 @@ interface UserProps {
   email: string;
   password: string;
   googleId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export class User extends Entity<UserProps> {
