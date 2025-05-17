@@ -26,7 +26,13 @@
       "@types/estree",
       "@types/http-errors",
       "@types/json-schema",
-      "@types/range-parser"
-    ]
+      "@types/range-parser",
+      "vitest/globals"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
   }
 }
