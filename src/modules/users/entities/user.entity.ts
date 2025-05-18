@@ -19,6 +19,18 @@ export class User extends Entity<UserProps> {
     return this.props.email;
   }
 
+  get password() {
+    return this.props.password;
+  }
+
+  get createdAt() {
+    return this.props.createdAt;
+  }
+
+  get updatedAt() {
+    return this.props.updatedAt;
+  }
+
   static create(props: UserProps, id?: UniqueEntityId) {
     const user = new User(
       {
