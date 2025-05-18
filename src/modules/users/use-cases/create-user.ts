@@ -1,7 +1,9 @@
 import { Either, left, right } from '@/core/either';
-import { UserRepositoryInterface } from '../repositories/user.respository.interface';
 import { User } from '../entities/user.entity';
 import { UserAlreadyExistsError } from './errors/user-already-exists-error';
+import { UserRepository } from '../repositories/user.repository';
+import { Inject } from '@nestjs/common';
+import { USER_REPOSITORY } from '../repositories/user.respository.interface';
 
 interface CreateUserRequest {
   name: string;
@@ -12,7 +14,9 @@ interface CreateUserRequest {
 type CreateUserResponse = Either<UserAlreadyExistsError, { user: User }>;
 
 export class CreateUserUseCase {
-  constructor(private userRepository: UserRepositoryInterface) {}
+  constructor(
+    @Inject(USER_REPOSITORY) private userRepository: UserRepository,
+  ) {}
 
   async execute(data: CreateUserRequest): Promise<CreateUserResponse> {
     const { name, email, password } = data;

@@ -14,8 +14,6 @@ import { EnvModule } from './modules/env/env.module';
       inject: [EnvService],
       useFactory: (envService: EnvService) => ({
         uri: envService.get('MONGODB_URI'),
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
       }),
     }),
     ConfigModule.forRoot({
