@@ -7,6 +7,8 @@ import {
 } from '../repositories/user.respository.interface';
 import { Inject } from '@nestjs/common';
 
+import { hash } from 'bcryptjs';
+
 interface CreateUserRequest {
   name: string;
   email: string;
@@ -29,10 +31,12 @@ export class CreateUserUseCase {
       return left(new UserAlreadyExistsError());
     }
 
+    const passwordHash = await hash(password, 8);
+
     const user = User.create({
       name,
       email,
-      password,
+      password: passwordHash,
     });
 
     await this.userRepository.create(user);
