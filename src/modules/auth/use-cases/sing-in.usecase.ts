@@ -1,10 +1,10 @@
+import { Encrypter } from '@/core/criptografhy/encrypter';
+import { HashCompare } from '@/core/criptografhy/hash-compare';
 import {
   USER_REPOSITORY,
   UserRepositoryInterface,
 } from '@/modules/users/repositories/user.respository.interface';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
 
 type SignInResponse = {
   accessToken: string;
@@ -14,7 +14,8 @@ type SignInResponse = {
 export class SignInUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private userRepository: UserRepositoryInterface,
-    private jwtService: JwtService,
+    private encrypter: Encrypter,
+    private hashCompare: HashCompare,
   ) {}
 
   async execute(email: string, pass: string): Promise<SignInResponse> {
@@ -24,7 +25,7 @@ export class SignInUseCase {
       throw new UnauthorizedException();
     }
 
-    const isPasswordValid = await bcrypt.compare(pass, user.password);
+    const isPasswordValid = this.hashCompare.compare(pass, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException();
@@ -32,7 +33,7 @@ export class SignInUseCase {
 
     const payload = { email: user.email, sub: user.id.toString() };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.encrypter.encrypt(payload);
     return { accessToken };
   }
 }

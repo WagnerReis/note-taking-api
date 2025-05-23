@@ -6,12 +6,14 @@ import { envSchema } from './modules/env/env';
 import { EnvService } from './modules/env/env.service';
 import { EnvModule } from './modules/env/env.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CryptographyModule } from './modules/cryptography/cryptography.module';
 
 @Module({
   imports: [
     UsersModule,
     EnvModule,
     AuthModule,
+    CryptographyModule,
     MongooseModule.forRootAsync({
       imports: [EnvModule],
       inject: [EnvService],
