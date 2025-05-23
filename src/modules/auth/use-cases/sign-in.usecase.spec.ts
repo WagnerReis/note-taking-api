@@ -1,43 +1,59 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
 import { SignInUseCase } from './sing-in.usecase';
-import { USER_REPOSITORY } from '@/modules/users/repositories/user.respository.interface';
 import { InMemoryUsersRepository } from 'test/repositories/in-memory-user.repository';
 import { User } from '@/modules/users/entities/user.entity';
+import { FakeHasher } from 'test/cryptography/fake-hasher';
+import { FakeEncrypter } from 'test/cryptography/fake-encrypter';
+import { UnauthorizedException } from '@nestjs/common';
+
+let inMemoryUsersRepository: InMemoryUsersRepository;
+let bcryptHasher: FakeEncrypter;
+let hashComparer: FakeHasher;
+let sut: SignInUseCase;
 
 describe('SignInUseCase', () => {
-  let service: SignInUseCase;
-  let inMemoryUsersRepository: InMemoryUsersRepository;
+  beforeEach(() => {
+    inMemoryUsersRepository = new InMemoryUsersRepository();
+    bcryptHasher = new FakeEncrypter();
+    hashComparer = new FakeHasher();
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SignInUseCase,
-        JwtService,
-        {
-          provide: USER_REPOSITORY,
-          useValue: InMemoryUsersRepository,
-        },
-      ],
-    }).compile();
-
-    service = module.get<SignInUseCase>(SignInUseCase);
-    inMemoryUsersRepository =
-      module.get<InMemoryUsersRepository>(USER_REPOSITORY);
+    sut = new SignInUseCase(
+      inMemoryUsersRepository,
+      bcryptHasher,
+      hashComparer,
+    );
   });
 
-  // TODO: finish this test
-  it('should be defined', async () => {
+  it('should return a access token', async () => {
     const user = User.create({
       name: 'any_name',
       email: 'any_email',
-      password: 'any_password',
+      password: 'any_password-hashed',
     });
 
     await inMemoryUsersRepository.create(user);
 
-    const response = await service.execute('any_email', 'any_password');
+    const response = await sut.execute('any_email', 'any_password');
 
     expect(response).toHaveProperty('accessToken');
+  });
+
+  it('should return unauthorized error if email is invalid', async () => {
+    await expect(
+      sut.execute('invalid_email', 'any_password'),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('should return unauthorized error if password is invalid', async () => {
+    const user = User.create({
+      name: 'any_name',
+      email: 'any_email',
+      password: 'any_password-hashed',
+    });
+
+    await inMemoryUsersRepository.create(user);
+
+    await expect(
+      sut.execute('any_email', 'invalid_password'),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });
