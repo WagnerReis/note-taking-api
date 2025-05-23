@@ -5,10 +5,13 @@ import { ConfigModule } from '@nestjs/config';
 import { envSchema } from './modules/env/env';
 import { EnvService } from './modules/env/env.service';
 import { EnvModule } from './modules/env/env.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
     UsersModule,
+    EnvModule,
+    AuthModule,
     MongooseModule.forRootAsync({
       imports: [EnvModule],
       inject: [EnvService],
@@ -18,6 +21,7 @@ import { EnvModule } from './modules/env/env.module';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
       validate: (env) => envSchema.parse(env),
     }),
   ],
