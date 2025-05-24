@@ -21,6 +21,8 @@ export class MongoCreateUserMapper {
       name: entity.name,
       email: entity.email,
       password: entity.password,
+      googleId: entity.googleId,
+      provider: entity.provider,
       createdAt: entity.createdAt ?? new Date(),
       updatedAt: new Date(),
     };

@@ -6,6 +6,7 @@ interface UserProps {
   email: string;
   password: string;
   googleId?: string;
+  provider?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -21,6 +22,14 @@ export class User extends Entity<UserProps> {
 
   get password() {
     return this.props.password;
+  }
+
+  get googleId() {
+    return this.props.googleId;
+  }
+
+  get provider() {
+    return this.props.provider;
   }
 
   get createdAt() {

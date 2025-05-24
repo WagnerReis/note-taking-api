@@ -25,6 +25,9 @@ export class User {
   @Prop()
   googleId?: string;
 
+  @Prop()
+  provider?: string;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 
