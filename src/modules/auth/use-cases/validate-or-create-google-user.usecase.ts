@@ -1,3 +1,4 @@
+import { Either, right } from '@/core/either';
 import { User } from '@/modules/users/entities/user.entity';
 import {
   USER_REPOSITORY,
@@ -12,6 +13,13 @@ export interface GoogleUser {
   googleId: string;
 }
 
+type ValidateUserResponse = Either<
+  null,
+  {
+    user: User;
+  }
+>;
+
 export class ValidateOrCreateGoogleUserUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
@@ -20,7 +28,7 @@ export class ValidateOrCreateGoogleUserUseCase {
 
   private readonly logger = new Logger(ValidateOrCreateGoogleUserUseCase.name);
 
-  async execute(user: GoogleUser) {
+  async execute(user: GoogleUser): Promise<ValidateUserResponse> {
     const dbUser = await this.usersRepository.findByEmail(user.email);
     let userEntity: User;
 
@@ -36,11 +44,11 @@ export class ValidateOrCreateGoogleUserUseCase {
 
       await this.usersRepository.create(userEntity);
 
-      return userEntity;
+      return right({ user: userEntity });
     }
 
     this.logger.log(`User with email ${user.email} found in db`);
 
-    return dbUser;
+    return right({ user: dbUser });
   }
 }

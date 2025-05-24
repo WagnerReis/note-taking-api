@@ -1,14 +1,18 @@
 import { Encrypter } from '@/core/criptografhy/encrypter';
 import { HashCompare } from '@/core/criptografhy/hash-compare';
+import { Either, left, right } from '@/core/either';
 import {
   USER_REPOSITORY,
   UserRepositoryInterface,
 } from '@/modules/users/repositories/user.respository.interface';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
-type SignInResponse = {
-  accessToken: string;
-};
+type SignInResponse = Either<
+  UnauthorizedException,
+  {
+    accessToken: string;
+  }
+>;
 
 @Injectable()
 export class SignInUseCase {
@@ -22,18 +26,18 @@ export class SignInUseCase {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
-      throw new UnauthorizedException();
+      return left(new UnauthorizedException('User not found'));
     }
 
     const isPasswordValid = this.hashCompare.compare(pass, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException();
+      return left(new UnauthorizedException('Invalid password'));
     }
 
     const payload = { email: user.email, sub: user.id.toString() };
 
     const accessToken = await this.encrypter.encrypt(payload);
-    return { accessToken };
+    return right({ accessToken });
   }
 }

@@ -32,15 +32,17 @@ describe('SignInUseCase', () => {
 
     await inMemoryUsersRepository.create(user);
 
-    const response = await sut.execute('any_email', 'any_password');
+    const result = await sut.execute('any_email', 'any_password');
 
-    expect(response).toHaveProperty('accessToken');
+    expect(result.isRight()).toBe(true);
+    expect(result.value).toHaveProperty('accessToken');
   });
 
   it('should return unauthorized error if email is invalid', async () => {
-    await expect(
-      sut.execute('invalid_email', 'any_password'),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+    const result = await sut.execute('invalid_email', 'any_password');
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(UnauthorizedException);
   });
 
   it('should return unauthorized error if password is invalid', async () => {
@@ -52,8 +54,9 @@ describe('SignInUseCase', () => {
 
     await inMemoryUsersRepository.create(user);
 
-    await expect(
-      sut.execute('any_email', 'invalid_password'),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+    const result = await sut.execute('any_email', 'invalid_password');
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(UnauthorizedException);
   });
 });

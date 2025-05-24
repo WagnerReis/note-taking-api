@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { SignInUseCase } from './use-cases/sing-in.usecase';
@@ -38,11 +39,20 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(@Body() signInBody: SignInBody, @Res() res: Response) {
-    const { accessToken } = await this.signInUseCase.execute(
+  async signIn(
+    @Body() signInBody: SignInBody,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.signInUseCase.execute(
       signInBody.email,
       signInBody.password,
     );
+
+    if (result.isLeft()) {
+      throw result.value;
+    }
+
+    const { accessToken } = result.value;
 
     res.cookie('authToken', accessToken, {
       httpOnly: true,
@@ -63,13 +73,19 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const { user } = req;
-    const dbUser = await this.validateOrCreateGoogleUserUseCase.execute(
+    const result = await this.validateOrCreateGoogleUserUseCase.execute(
       user as GoogleUser,
     );
 
+    if (result.isLeft()) {
+      throw new BadRequestException();
+    }
+
+    const { user: userDb } = result.value;
+
     const token = await this.encrypter.encrypt({
-      sub: dbUser.id,
-      email: dbUser.email,
+      sub: userDb.id,
+      email: userDb.email,
     });
 
     res.cookie('authToken', token, {
