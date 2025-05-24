@@ -39,7 +39,7 @@ export class ValidateOrCreateGoogleUserUseCase {
         name: user.name,
         provider: user.provider,
         googleId: user.googleId,
-        password: 'test1234',
+        password: '',
       });
 
       await this.usersRepository.create(userEntity);

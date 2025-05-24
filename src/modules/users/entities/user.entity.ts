@@ -2,7 +2,7 @@ import { Entity } from '@/core/entities/entity';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 
 interface UserProps {
-  name: string;
+  name?: string;
   email: string;
   password: string;
   googleId?: string;

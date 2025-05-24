@@ -10,7 +10,7 @@ import { Inject } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 
 interface CreateUserRequest {
-  name: string;
+  name?: string;
   email: string;
   password: string;
 }
@@ -23,7 +23,7 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(data: CreateUserRequest): Promise<CreateUserResponse> {
-    const { name, email, password } = data;
+    const { email, password } = data;
 
     const userAlreadyExists = await this.userRepository.findByEmail(email);
 
@@ -34,7 +34,6 @@ export class CreateUserUseCase {
     const passwordHash = await hash(password, 8);
 
     const user = User.create({
-      name,
       email,
       password: passwordHash,
     });

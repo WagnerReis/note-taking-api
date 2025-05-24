@@ -13,8 +13,8 @@ export class User {
   })
   _id: string;
 
-  @Prop({ required: true })
-  name: string;
+  @Prop({ required: false })
+  name?: string;
 
   @Prop({ required: true, unique: true })
   email: string;
