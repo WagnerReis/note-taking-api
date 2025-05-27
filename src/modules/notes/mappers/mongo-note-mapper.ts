@@ -1,25 +1,27 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { Note as NoteModel } from '../models/note.model';
-import { Note, StatusEnum } from '../entities/note.entity';
+import { NoteDocument, Note as NoteModel } from '../models/note.model';
+import { Note } from '../entities/note.entity';
 
 export class MongoNoteMapper {
-  static toDomain(raw: NoteModel): Note {
+  static toDomain(raw: NoteDocument): Note {
     return Note.create(
       {
         title: raw.title,
         content: raw.content,
-        status: StatusEnum[raw.status as keyof typeof StatusEnum],
+        status: raw.status,
+        tags: raw.tags,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
-      new UniqueEntityId(),
+      new UniqueEntityId(raw.id),
     );
   }
   static toPersistence(entity: Note): NoteModel {
     return {
       title: entity.title,
       content: entity.content,
-      status: String(entity.status),
+      status: entity.status,
+      tags: entity.tags,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

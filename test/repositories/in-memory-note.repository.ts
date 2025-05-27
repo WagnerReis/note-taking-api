@@ -1,7 +1,10 @@
 import { Note } from '@/modules/notes/entities/note.entity';
+import { QueryProps } from '@/modules/notes/repositories/note.repository';
 import { NoteRepositoryInterface } from '@/modules/notes/repositories/note.repository.interface';
 
-export class InMemoryNotesRepository implements NoteRepositoryInterface {
+export class InMemoryNotesRepository
+  implements NoteRepositoryInterface<QueryProps>
+{
   public notes: Note[] = [];
 
   async create(note: Note): Promise<void> {
@@ -30,5 +33,13 @@ export class InMemoryNotesRepository implements NoteRepositoryInterface {
 
   async findAll(): Promise<Note[]> {
     return Promise.resolve(this.notes);
+  }
+
+  async find(query: QueryProps): Promise<Note[]> {
+    const notesFound = this.notes.filter(
+      (note) => note.status === query.status,
+    );
+
+    return Promise.resolve(notesFound);
   }
 }

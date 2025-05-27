@@ -1,14 +1,18 @@
 import { NoteDocument } from '@/modules/notes/models/note.model';
-import { Note } from '../entities/note.entity';
+import { Note, StatusEnum } from '../entities/note.entity';
 import { MongoNoteMapper } from '../mappers/mongo-note-mapper';
 import { NoteRepositoryInterface } from './note.repository.interface';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
-export class NoteRepository implements NoteRepositoryInterface {
+export interface QueryProps {
+  status: StatusEnum;
+}
+
+export class NoteRepository implements NoteRepositoryInterface<QueryProps> {
   constructor(
     @InjectModel(Note.name) private readonly noteModel: Model<NoteDocument>,
-  ) { }
+  ) {}
 
   async create(data: Note): Promise<void> {
     const note = MongoNoteMapper.toPersistence(data);
@@ -37,6 +41,20 @@ export class NoteRepository implements NoteRepositoryInterface {
 
   async findAll(): Promise<Note[]> {
     const notes = await this.noteModel.find();
+    return notes.map((note) => MongoNoteMapper.toDomain(note));
+  }
+
+  async find(query: QueryProps): Promise<Note[]> {
+    const notes = await this.noteModel.find(
+      query,
+      {},
+      { cursor: { sort: { createdAt: -1 } } },
+    );
+
+    if (!notes.length) {
+      return [];
+    }
+
     return notes.map((note) => MongoNoteMapper.toDomain(note));
   }
 }

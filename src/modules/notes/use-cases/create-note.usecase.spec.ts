@@ -14,5 +14,10 @@ describe('Create notes use case', () => {
 
     expect(result.isRight()).toBe(true);
     expect(inMemoryNotesRepository.notes).toHaveLength(1);
+    expect(inMemoryNotesRepository.notes[0].title).toBe('test');
+    expect(inMemoryNotesRepository.notes[0].content).toBe('test content');
+    expect(inMemoryNotesRepository.notes[0].status).toBe('active');
+    expect(inMemoryNotesRepository.notes[0].createdAt).toBeInstanceOf(Date);
+    expect(inMemoryNotesRepository.notes[0].updatedAt).toBeInstanceOf(Date);
   });
 });

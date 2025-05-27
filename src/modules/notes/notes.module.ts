@@ -3,6 +3,7 @@ import { NotesController } from './notes.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Note, NoteSchema } from './models/note.model';
 import { CreateNoteUseCase } from './use-cases/create-note.usecase';
+import { GetNotesUseCase } from './use-cases/get-notes.usecase';
 import { NoteRepository } from './repositories/note.repository';
 import { NoteRepositoryInterface } from './repositories/note.repository.interface';
 
@@ -12,11 +13,12 @@ import { NoteRepositoryInterface } from './repositories/note.repository.interfac
   ],
   controllers: [NotesController],
   providers: [
-    CreateNoteUseCase,
     {
       provide: NoteRepositoryInterface,
       useClass: NoteRepository,
     },
+    GetNotesUseCase,
+    CreateNoteUseCase,
   ],
   exports: [],
 })
