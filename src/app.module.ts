@@ -7,6 +7,7 @@ import { EnvService } from './modules/env/env.service';
 import { EnvModule } from './modules/env/env.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CryptographyModule } from './modules/cryptography/cryptography.module';
+import { NotesModule } from './modules/notes/notes.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CryptographyModule } from './modules/cryptography/cryptography.module';
       envFilePath: '.env',
       validate: (env) => envSchema.parse(env),
     }),
+    NotesModule,
   ],
   controllers: [],
   providers: [EnvService],

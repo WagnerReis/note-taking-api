@@ -12,12 +12,11 @@ export class MongoCreateUserMapper {
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
-      new UniqueEntityId(raw._id),
+      new UniqueEntityId(),
     );
   }
   static toPersistence(entity: User): UserModel {
     return {
-      _id: entity.id.toString(),
       name: entity.name,
       email: entity.email,
       password: entity.password,
