@@ -9,6 +9,7 @@ interface NoteProps {
   title: string;
   content: string;
   status: StatusEnum;
+  tags: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -26,6 +27,10 @@ export class Note extends Entity<NoteProps> {
     return this.props.status;
   }
 
+  get tags(): string[] {
+    return this.props.tags;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt!;
   }
@@ -37,10 +42,24 @@ export class Note extends Entity<NoteProps> {
     const note = new Note(
       {
         ...props,
+        createdAt: props.createdAt || new Date(),
+        updatedAt: props.updatedAt || new Date(),
       },
       id,
     );
 
     return note;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      title: this.title,
+      content: this.content,
+      status: this.status,
+      tags: this.tags,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

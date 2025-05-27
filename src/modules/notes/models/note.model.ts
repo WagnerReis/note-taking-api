@@ -1,7 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { StatusEnum } from '../entities/note.entity';
 
-export type NoteDocument = Note & Document;
+export interface NoteDocument extends Note, Document {
+  id: string;
+}
 
 @Schema()
 export class Note {
@@ -11,8 +14,11 @@ export class Note {
   @Prop({ required: true })
   content: string;
 
-  @Prop({ required: true, enum: ['active', 'archived'] })
-  status: string;
+  @Prop({ required: true, enum: StatusEnum })
+  status: StatusEnum;
+
+  @Prop({ required: false })
+  tags: string[];
 
   @Prop({ default: Date.now })
   createdAt: Date;
