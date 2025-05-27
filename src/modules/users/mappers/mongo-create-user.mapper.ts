@@ -1,9 +1,9 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { User } from '../entities/user.entity';
-import { User as UserModel } from '../models/user.model';
+import { UserDocument, User as UserModel } from '../models/user.model';
 
 export class MongoCreateUserMapper {
-  static toDomain(raw: UserModel): User {
+  static toDomain(raw: UserDocument): User {
     return User.create(
       {
         name: raw.name,
@@ -12,7 +12,7 @@ export class MongoCreateUserMapper {
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
-      new UniqueEntityId(),
+      new UniqueEntityId(raw.id),
     );
   }
   static toPersistence(entity: User): UserModel {

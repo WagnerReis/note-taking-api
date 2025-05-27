@@ -1,7 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type UserDocument = User & Document;
+export interface UserDocument extends User, Document {
+  id: string;
+}
 
 @Schema()
 export class User {
@@ -26,4 +28,5 @@ export class User {
   @Prop({ default: Date.now })
   updatedAt: Date;
 }
+
 export const UserSchema = SchemaFactory.createForClass(User);

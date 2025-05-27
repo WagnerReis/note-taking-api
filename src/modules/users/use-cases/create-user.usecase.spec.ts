@@ -1,5 +1,5 @@
 import { InMemoryUsersRepository } from 'test/repositories/in-memory-user.repository';
-import { CreateUserUseCase } from './create-user';
+import { CreateUserUseCase } from './create-user.usecase';
 import { UserAlreadyExistsError } from './errors/user-already-exists-error';
 
 const inMemoryUserRepository = new InMemoryUsersRepository();

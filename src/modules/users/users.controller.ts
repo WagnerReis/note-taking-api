@@ -13,7 +13,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { z } from 'zod';
-import { CreateUserUseCase } from './use-cases/create-user';
+import { CreateUserUseCase } from './use-cases/create-user.usecase';
 import { UserAlreadyExistsError } from './use-cases/errors/user-already-exists-error';
 import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
 import { Response } from 'express';
