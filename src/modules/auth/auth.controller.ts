@@ -39,10 +39,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(
-    @Body() signInBody: SignInBody,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async signIn(@Body() signInBody: SignInBody, @Res() res: Response) {
     const result = await this.signInUseCase.execute(
       signInBody.email,
       signInBody.password,
