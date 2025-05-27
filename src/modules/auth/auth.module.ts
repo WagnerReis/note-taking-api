@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { UserRepository } from '../users/repositories/user.repository';
-import { USER_REPOSITORY } from '../users/repositories/user.respository.interface';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../users/models/user.model';
@@ -11,6 +10,7 @@ import { SignInUseCase } from './use-cases/sing-in.usecase';
 import { CryptographyModule } from '../cryptography/cryptography.module';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { ValidateOrCreateGoogleUserUseCase } from './use-cases/validate-or-create-google-user.usecase';
+import { UserRepositoryInterface } from '../users/repositories/user.respository.interface';
 
 @Module({
   imports: [
@@ -34,7 +34,7 @@ import { ValidateOrCreateGoogleUserUseCase } from './use-cases/validate-or-creat
     GoogleStrategy,
     ValidateOrCreateGoogleUserUseCase,
     {
-      provide: USER_REPOSITORY,
+      provide: UserRepositoryInterface,
       useClass: UserRepository,
     },
   ],

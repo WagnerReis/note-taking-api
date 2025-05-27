@@ -1,11 +1,8 @@
 import { Encrypter } from '@/core/criptografhy/encrypter';
 import { HashCompare } from '@/core/criptografhy/hash-compare';
 import { Either, left, right } from '@/core/either';
-import {
-  USER_REPOSITORY,
-  UserRepositoryInterface,
-} from '@/modules/users/repositories/user.respository.interface';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { UserRepositoryInterface } from '@/modules/users/repositories/user.respository.interface';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 type SignInResponse = Either<
   UnauthorizedException,
@@ -17,7 +14,7 @@ type SignInResponse = Either<
 @Injectable()
 export class SignInUseCase {
   constructor(
-    @Inject(USER_REPOSITORY) private userRepository: UserRepositoryInterface,
+    private userRepository: UserRepositoryInterface,
     private encrypter: Encrypter,
     private hashCompare: HashCompare,
   ) {}

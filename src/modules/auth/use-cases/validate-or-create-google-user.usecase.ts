@@ -1,10 +1,7 @@
 import { Either, right } from '@/core/either';
 import { User } from '@/modules/users/entities/user.entity';
-import {
-  USER_REPOSITORY,
-  UserRepositoryInterface,
-} from '@/modules/users/repositories/user.respository.interface';
-import { Inject, Logger } from '@nestjs/common';
+import { UserRepositoryInterface } from '@/modules/users/repositories/user.respository.interface';
+import { Logger } from '@nestjs/common';
 
 export interface GoogleUser {
   email: string;
@@ -21,10 +18,7 @@ type ValidateUserResponse = Either<
 >;
 
 export class ValidateOrCreateGoogleUserUseCase {
-  constructor(
-    @Inject(USER_REPOSITORY)
-    private readonly usersRepository: UserRepositoryInterface,
-  ) {}
+  constructor(private readonly usersRepository: UserRepositoryInterface) {}
 
   private readonly logger = new Logger(ValidateOrCreateGoogleUserUseCase.name);
 
