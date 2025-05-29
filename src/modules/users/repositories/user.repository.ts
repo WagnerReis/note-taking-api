@@ -6,7 +6,7 @@ import { User as UserEntity } from '../entities/user.entity';
 import { MongoCreateUserMapper } from '../mappers/mongo-create-user.mapper';
 
 export class UserRepository implements UserRepositoryInterface {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.userModel.findOne({ email });

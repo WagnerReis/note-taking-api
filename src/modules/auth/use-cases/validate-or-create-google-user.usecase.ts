@@ -1,7 +1,7 @@
 import { Either, right } from '@/core/either';
 import { User } from '@/modules/users/entities/user.entity';
 import { UserRepositoryInterface } from '@/modules/users/repositories/user.respository.interface';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 export interface GoogleUser {
   email: string;
@@ -17,12 +17,17 @@ type ValidateUserResponse = Either<
   }
 >;
 
+@Injectable()
 export class ValidateOrCreateGoogleUserUseCase {
   constructor(private readonly usersRepository: UserRepositoryInterface) {}
 
   private readonly logger = new Logger(ValidateOrCreateGoogleUserUseCase.name);
 
   async execute(user: GoogleUser): Promise<ValidateUserResponse> {
+    console.log(
+      '🚀 ~ ValidateOrCreateGoogleUserUseCase ~ execute ~ this.usersRepository:',
+      this.usersRepository,
+    );
     const dbUser = await this.usersRepository.findByEmail(user.email);
     let userEntity: User;
 
