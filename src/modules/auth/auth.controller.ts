@@ -20,6 +20,7 @@ import {
 } from './use-cases/validate-or-create-google-user.usecase';
 import { Encrypter } from '@/core/criptografhy/encrypter';
 import { EnvService } from '../env/env.service';
+import { Public } from './decorators/public.decorator';
 
 type SignInBody = {
   email: string;
@@ -37,6 +38,7 @@ export class AuthController {
 
   private readonly logger: Logger = new Logger(AuthController.name);
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async signIn(@Body() signInBody: SignInBody, @Res() res: Response) {

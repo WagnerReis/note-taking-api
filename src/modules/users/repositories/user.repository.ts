@@ -4,6 +4,7 @@ import { User, UserDocument } from '../models/user.model';
 import { Model } from 'mongoose';
 import { User as UserEntity } from '../entities/user.entity';
 import { MongoCreateUserMapper } from '../mappers/mongo-create-user.mapper';
+import { Types } from 'mongoose';
 
 export class UserRepository implements UserRepositoryInterface {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
@@ -25,7 +26,7 @@ export class UserRepository implements UserRepositoryInterface {
   }
 
   async findById(id: string): Promise<UserEntity | null> {
-    const user = await this.userModel.findById({ id });
+    const user = await this.userModel.findById({ _id: new Types.ObjectId(id) });
     if (!user) {
       return null;
     }

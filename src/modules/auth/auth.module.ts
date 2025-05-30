@@ -11,6 +11,7 @@ import { CryptographyModule } from '../cryptography/cryptography.module';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { ValidateOrCreateGoogleUserUseCase } from './use-cases/validate-or-create-google-user.usecase';
 import { UserRepositoryInterface } from '../users/repositories/user.respository.interface';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserRepositoryInterface } from '../users/repositories/user.respository.
     }),
   ],
   providers: [
+    JwtStrategy,
     SignInUseCase,
     GoogleStrategy,
     ValidateOrCreateGoogleUserUseCase,

@@ -11,6 +11,8 @@ import {
   BadRequestException,
   Res,
   HttpStatus,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { z } from 'zod';
 import { CreateUserUseCase } from './use-cases/create-user.usecase';
@@ -18,6 +20,8 @@ import { UserAlreadyExistsError } from './use-cases/errors/user-already-exists-e
 import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
 import { Response } from 'express';
 import { EnvService } from '../env/env.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
 
 const createUserBodySchema = z.object({
   email: z.string(),
@@ -34,6 +38,7 @@ export class UsersController {
     private readonly envService: EnvService,
   ) {}
 
+  @Public()
   @Post()
   async create(
     @Body(new ZodValidationPipe(createUserBodySchema)) body: CreateUserBody,

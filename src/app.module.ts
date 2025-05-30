@@ -8,6 +8,8 @@ import { EnvModule } from './modules/env/env.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CryptographyModule } from './modules/cryptography/cryptography.module';
 import { NotesModule } from './modules/notes/notes.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -30,6 +32,12 @@ import { NotesModule } from './modules/notes/notes.module';
     NotesModule,
   ],
   controllers: [],
-  providers: [EnvService],
+  providers: [
+    EnvService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
