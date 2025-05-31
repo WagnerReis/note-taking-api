@@ -25,6 +25,10 @@ export class User extends Entity<UserProps> {
     return this.props.password;
   }
 
+  set password(value: string) {
+    this.props.password = value;
+  }
+
   get refreshToken() {
     return this.props.refreshToken!;
   }

@@ -9,6 +9,7 @@ import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
 import { CryptographyModule } from '../cryptography/cryptography.module';
 import { UserRepositoryInterface } from './repositories/user.respository.interface';
 import { GenerateTokensUseCase } from '../auth/use-cases/generate-tokens.usecase';
+import { ChangePasswordUseCase } from './use-cases/change-password.usecase';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { GenerateTokensUseCase } from '../auth/use-cases/generate-tokens.usecase
     CreateUserUseCase,
     SignInUseCase,
     GenerateTokensUseCase,
+    ChangePasswordUseCase,
     {
       provide: UserRepositoryInterface,
       useClass: UserRepository,
