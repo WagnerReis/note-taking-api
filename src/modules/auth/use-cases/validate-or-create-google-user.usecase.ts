@@ -24,10 +24,6 @@ export class ValidateOrCreateGoogleUserUseCase {
   private readonly logger = new Logger(ValidateOrCreateGoogleUserUseCase.name);
 
   async execute(user: GoogleUser): Promise<ValidateUserResponse> {
-    console.log(
-      '🚀 ~ ValidateOrCreateGoogleUserUseCase ~ execute ~ this.usersRepository:',
-      this.usersRepository,
-    );
     const dbUser = await this.usersRepository.findByEmail(user.email);
     let userEntity: User;
 

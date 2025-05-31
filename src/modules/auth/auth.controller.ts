@@ -11,16 +11,15 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { SignInUseCase } from './use-cases/sing-in.usecase';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  GoogleUser,
-  ValidateOrCreateGoogleUserUseCase,
-} from './use-cases/validate-or-create-google-user.usecase';
-import { Encrypter } from '@/core/criptografhy/encrypter';
 import { EnvService } from '../env/env.service';
 import { Public } from './decorators/public.decorator';
+import { AuthenticateByGoogleUseCase } from './use-cases/authenticate-by-google.usecase';
+import { GoogleUser } from './use-cases/validate-or-create-google-user.usecase';
+import { GenerateTokensUseCase } from './use-cases/generate-tokens.usecase';
+import { CurrentUser } from './decorators/current-user.decorator';
 
 type SignInBody = {
   email: string;
@@ -31,9 +30,9 @@ type SignInBody = {
 export class AuthController {
   constructor(
     private readonly signInUseCase: SignInUseCase,
-    private readonly validateOrCreateGoogleUserUseCase: ValidateOrCreateGoogleUserUseCase,
-    private readonly encrypter: Encrypter,
+    private readonly authenticateByGoogleUseCase: AuthenticateByGoogleUseCase,
     private readonly envService: EnvService,
+    private readonly generateTokensUseCase: GenerateTokensUseCase,
   ) {}
 
   private readonly logger: Logger = new Logger(AuthController.name);
@@ -51,50 +50,70 @@ export class AuthController {
       throw result.value;
     }
 
-    const { accessToken } = result.value;
+    const { accessToken, refreshToken } = result.value;
 
-    res.cookie('authToken', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge:
-        Number(this.envService.get('JWT_EXPIRATION')) * 1000 * 60 * 60 * 24,
-    });
+    this.setAuthCookies(res, accessToken, refreshToken);
 
     return res.sendStatus(HttpStatus.OK);
   }
 
+  @Public()
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
+  @Public()
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const { user } = req;
-    const result = await this.validateOrCreateGoogleUserUseCase.execute(
+
+    const result = await this.authenticateByGoogleUseCase.execute(
       user as GoogleUser,
     );
 
     if (result.isLeft()) {
-      throw new BadRequestException();
+      throw new BadRequestException('Falha ao autenticar com o Google');
     }
 
-    const { user: userDb } = result.value;
+    const { accessToken, refreshToken } = result.value;
 
-    const token = await this.encrypter.encrypt({
-      sub: userDb.id,
-      email: userDb.email,
-    });
-
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
+    this.setAuthCookies(res, accessToken, refreshToken);
 
     this.logger.log(`Redirecting to ${this.envService.get('FRONTEND_URL')}`);
 
     return res.redirect(this.envService.get('FRONTEND_URL'));
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  async refresh(@CurrentUser('sub') userId: string, @Res() res: Response) {
+    const result = await this.generateTokensUseCase.execute(userId);
+
+    if (result.isLeft()) {
+      throw new BadRequestException('Invalid refresh token or user');
+    }
+
+    const { accessToken, refreshToken } = result.value;
+
+    this.setAuthCookies(res, accessToken, refreshToken);
+
+    return { message: 'Tokens refreshed' };
+  }
+
+  private setAuthCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
+    const commonOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict' as const,
+      path: '/',
+    };
+
+    res.cookie('authToken', accessToken, commonOptions);
+    res.cookie('refreshToken', refreshToken, commonOptions);
   }
 }

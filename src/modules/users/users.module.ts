@@ -8,6 +8,7 @@ import { EnvModule } from '../env/env.module';
 import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
 import { CryptographyModule } from '../cryptography/cryptography.module';
 import { UserRepositoryInterface } from './repositories/user.respository.interface';
+import { GenerateTokensUseCase } from '../auth/use-cases/generate-tokens.usecase';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserRepositoryInterface } from './repositories/user.respository.interfa
   providers: [
     CreateUserUseCase,
     SignInUseCase,
+    GenerateTokensUseCase,
     {
       provide: UserRepositoryInterface,
       useClass: UserRepository,

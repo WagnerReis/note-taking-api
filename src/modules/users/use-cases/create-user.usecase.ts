@@ -2,7 +2,7 @@ import { Either, left, right } from '@/core/either';
 import { User } from '../entities/user.entity';
 import { UserAlreadyExistsError } from './errors/user-already-exists-error';
 import { UserRepositoryInterface } from '../repositories/user.respository.interface';
-
+import { Injectable } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 
 interface CreateUserRequest {
@@ -13,6 +13,7 @@ interface CreateUserRequest {
 
 type CreateUserResponse = Either<UserAlreadyExistsError, { user: User }>;
 
+@Injectable()
 export class CreateUserUseCase {
   constructor(private userRepository: UserRepositoryInterface) {}
 

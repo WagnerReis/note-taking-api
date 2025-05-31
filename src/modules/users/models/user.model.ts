@@ -16,6 +16,9 @@ export class User {
   @Prop({})
   password: string;
 
+  @Prop({})
+  refreshToken?: string;
+
   @Prop()
   googleId?: string;
 

@@ -5,6 +5,7 @@ interface UserProps {
   name?: string;
   email: string;
   password: string;
+  refreshToken?: string;
   googleId?: string;
   provider?: string;
   createdAt?: Date;
@@ -22,6 +23,14 @@ export class User extends Entity<UserProps> {
 
   get password() {
     return this.props.password;
+  }
+
+  get refreshToken() {
+    return this.props.refreshToken!;
+  }
+
+  set refreshToken(value: string) {
+    this.props.refreshToken = value;
   }
 
   get googleId() {
@@ -44,6 +53,7 @@ export class User extends Entity<UserProps> {
     const user = new User(
       {
         ...props,
+        refreshToken: '',
       },
       id,
     );

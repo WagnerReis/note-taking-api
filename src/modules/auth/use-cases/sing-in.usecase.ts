@@ -1,22 +1,27 @@
-import { Encrypter } from '@/core/criptografhy/encrypter';
 import { HashCompare } from '@/core/criptografhy/hash-compare';
 import { Either, left, right } from '@/core/either';
 import { UserRepositoryInterface } from '@/modules/users/repositories/user.respository.interface';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { GenerateTokensUseCase } from './generate-tokens.usecase';
 
 type SignInResponse = Either<
-  UnauthorizedException,
+  UnauthorizedException | BadRequestException,
   {
     accessToken: string;
+    refreshToken: string;
   }
 >;
 
 @Injectable()
 export class SignInUseCase {
   constructor(
-    private userRepository: UserRepositoryInterface,
-    private encrypter: Encrypter,
-    private hashCompare: HashCompare,
+    private readonly userRepository: UserRepositoryInterface,
+    private readonly generateTokensUseCase: GenerateTokensUseCase,
+    private readonly hashCompare: HashCompare,
   ) {}
 
   async execute(email: string, pass: string): Promise<SignInResponse> {
@@ -32,9 +37,18 @@ export class SignInUseCase {
       return left(new UnauthorizedException('Invalid password'));
     }
 
-    const payload = { email: user.email, sub: user.id.toString() };
+    const result = await this.generateTokensUseCase.execute(user.id.toString());
 
-    const accessToken = await this.encrypter.encrypt(payload);
-    return right({ accessToken });
+    if (result.isLeft()) {
+      return left(new BadRequestException());
+    }
+
+    const { accessToken, refreshToken } = result.value;
+
+    user.refreshToken = refreshToken;
+
+    await this.userRepository.update(user);
+
+    return right({ accessToken, refreshToken });
   }
 }

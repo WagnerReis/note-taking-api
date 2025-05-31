@@ -3,11 +3,14 @@ import { InMemoryUsersRepository } from 'test/repositories/in-memory-user.reposi
 import { User } from '@/modules/users/entities/user.entity';
 import { FakeHasher } from 'test/cryptography/fake-hasher';
 import { FakeEncrypter } from 'test/cryptography/fake-encrypter';
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { GenerateTokensUseCase } from './generate-tokens.usecase';
+import { left } from '@/core/either';
 
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let bcryptHasher: FakeEncrypter;
 let hashComparer: FakeHasher;
+let generateTokens: GenerateTokensUseCase;
 let sut: SignInUseCase;
 
 describe('SignInUseCase', () => {
@@ -15,10 +18,11 @@ describe('SignInUseCase', () => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     bcryptHasher = new FakeEncrypter();
     hashComparer = new FakeHasher();
+    generateTokens = new GenerateTokensUseCase(bcryptHasher);
 
     sut = new SignInUseCase(
       inMemoryUsersRepository,
-      bcryptHasher,
+      generateTokens,
       hashComparer,
     );
   });
@@ -58,5 +62,22 @@ describe('SignInUseCase', () => {
 
     expect(result.isLeft()).toBe(true);
     expect(result.value).toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('should return an error if GenerateTokensUseCase fails', async () => {
+    const user = User.create({
+      name: 'any_name',
+      email: 'any_email',
+      password: 'any_password-hashed',
+    });
+
+    vi.spyOn(generateTokens, 'execute').mockResolvedValue(left(null));
+
+    await inMemoryUsersRepository.create(user);
+
+    const result = await sut.execute('any_email', 'any_password');
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(BadRequestException);
   });
 });

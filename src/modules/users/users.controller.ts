@@ -1,18 +1,12 @@
 import { ZodValidationPipe } from '@/core/pipes/zod-validation.pipe';
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   ConflictException,
   BadRequestException,
   Res,
   HttpStatus,
-  UseGuards,
-  Req,
 } from '@nestjs/common';
 import { z } from 'zod';
 import { CreateUserUseCase } from './use-cases/create-user.usecase';
@@ -20,7 +14,6 @@ import { UserAlreadyExistsError } from './use-cases/errors/user-already-exists-e
 import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
 import { Response } from 'express';
 import { EnvService } from '../env/env.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 
 const createUserBodySchema = z.object({
@@ -83,25 +76,5 @@ export class UsersController {
     });
 
     return res.sendStatus(HttpStatus.OK);
-  }
-
-  @Get()
-  findAll() {
-    // implement
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    // implement
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: any) {
-    // implement
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    // implement
   }
 }

@@ -12,6 +12,8 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { ValidateOrCreateGoogleUserUseCase } from './use-cases/validate-or-create-google-user.usecase';
 import { UserRepositoryInterface } from '../users/repositories/user.respository.interface';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AuthenticateByGoogleUseCase } from './use-cases/authenticate-by-google.usecase';
+import { GenerateTokensUseCase } from './use-cases/generate-tokens.usecase';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtStrategy,
     SignInUseCase,
     GoogleStrategy,
+    GenerateTokensUseCase,
+    AuthenticateByGoogleUseCase,
     ValidateOrCreateGoogleUserUseCase,
     {
       provide: UserRepositoryInterface,
