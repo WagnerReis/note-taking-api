@@ -6,6 +6,7 @@ import {
 import { Either, left, right } from '@/core/either';
 import { GenerateTokensUseCase } from './generate-tokens.usecase';
 import { UserRepositoryInterface } from '@/modules/users/repositories/user.respository.interface';
+import { HashGenerator } from '@/core/criptografhy/hash-generator';
 
 type AuthenticateByGoogleResponse = Either<
   BadRequestException,
@@ -18,6 +19,7 @@ export class AuthenticateByGoogleUseCase {
     private readonly validateOrCreateGoogleUserUseCase: ValidateOrCreateGoogleUserUseCase,
     private readonly generateTokensUseCase: GenerateTokensUseCase,
     private readonly userRepository: UserRepositoryInterface,
+    private readonly hashGenerator: HashGenerator,
   ) {}
 
   async execute(user: GoogleUser): Promise<AuthenticateByGoogleResponse> {
@@ -39,7 +41,7 @@ export class AuthenticateByGoogleUseCase {
 
     const { accessToken, refreshToken } = resultTokens.value;
 
-    userDb.refreshToken = refreshToken;
+    userDb.refreshToken = await this.hashGenerator.hash(refreshToken);
 
     await this.userRepository.update(userDb);
 

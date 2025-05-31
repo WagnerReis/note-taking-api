@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { GenerateTokensUseCase } from './generate-tokens.usecase';
+import { HashGenerator } from '@/core/criptografhy/hash-generator';
 
 type SignInResponse = Either<
   UnauthorizedException | BadRequestException,
@@ -22,6 +23,7 @@ export class SignInUseCase {
     private readonly userRepository: UserRepositoryInterface,
     private readonly generateTokensUseCase: GenerateTokensUseCase,
     private readonly hashCompare: HashCompare,
+    private readonly hashGenerator: HashGenerator,
   ) {}
 
   async execute(email: string, pass: string): Promise<SignInResponse> {
@@ -45,7 +47,9 @@ export class SignInUseCase {
 
     const { accessToken, refreshToken } = result.value;
 
-    user.refreshToken = refreshToken;
+    const refreshTokenHash = await this.hashGenerator.hash(refreshToken);
+
+    user.refreshToken = refreshTokenHash;
 
     await this.userRepository.update(user);
 

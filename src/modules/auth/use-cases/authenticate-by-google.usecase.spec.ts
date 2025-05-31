@@ -9,9 +9,11 @@ import {
 import { BadRequestException } from '@nestjs/common';
 import { right, left } from '@/core/either';
 import { AuthenticateByGoogleUseCase } from './authenticate-by-google.usecase';
+import { FakeHasher } from 'test/cryptography/fake-hasher';
 
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let bcryptHasher: FakeEncrypter;
+let hashGenerator: FakeHasher;
 let generateTokens: GenerateTokensUseCase;
 let validateOrCreateGoogleUser: ValidateOrCreateGoogleUserUseCase;
 let sut: AuthenticateByGoogleUseCase;
@@ -20,6 +22,7 @@ describe('AuthenticateByGoogleUseCase', () => {
   beforeEach(() => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     bcryptHasher = new FakeEncrypter();
+    hashGenerator = new FakeHasher();
     generateTokens = new GenerateTokensUseCase(bcryptHasher);
     validateOrCreateGoogleUser = new ValidateOrCreateGoogleUserUseCase(
       inMemoryUsersRepository,
@@ -29,6 +32,7 @@ describe('AuthenticateByGoogleUseCase', () => {
       validateOrCreateGoogleUser,
       generateTokens,
       inMemoryUsersRepository,
+      hashGenerator,
     );
   });
 
@@ -140,7 +144,7 @@ describe('AuthenticateByGoogleUseCase', () => {
 
     expect(updateSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        refreshToken: 'valid_refresh_token',
+        refreshToken: 'valid_refresh_token-hashed',
       }),
     );
   });

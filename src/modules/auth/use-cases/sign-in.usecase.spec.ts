@@ -6,10 +6,12 @@ import { FakeEncrypter } from 'test/cryptography/fake-encrypter';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { GenerateTokensUseCase } from './generate-tokens.usecase';
 import { left } from '@/core/either';
+import { HashGenerator } from '@/core/criptografhy/hash-generator';
 
 let inMemoryUsersRepository: InMemoryUsersRepository;
 let bcryptHasher: FakeEncrypter;
 let hashComparer: FakeHasher;
+let hashGenerator: HashGenerator;
 let generateTokens: GenerateTokensUseCase;
 let sut: SignInUseCase;
 
@@ -18,12 +20,14 @@ describe('SignInUseCase', () => {
     inMemoryUsersRepository = new InMemoryUsersRepository();
     bcryptHasher = new FakeEncrypter();
     hashComparer = new FakeHasher();
+    hashGenerator = new FakeHasher();
     generateTokens = new GenerateTokensUseCase(bcryptHasher);
 
     sut = new SignInUseCase(
       inMemoryUsersRepository,
       generateTokens,
       hashComparer,
+      hashGenerator,
     );
   });
 
