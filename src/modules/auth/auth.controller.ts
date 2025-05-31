@@ -10,6 +10,7 @@ import {
   Req,
   Logger,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { SignInUseCase } from './use-cases/sing-in.usecase';
@@ -18,8 +19,8 @@ import { EnvService } from '../env/env.service';
 import { Public } from './decorators/public.decorator';
 import { AuthenticateByGoogleUseCase } from './use-cases/authenticate-by-google.usecase';
 import { GoogleUser } from './use-cases/validate-or-create-google-user.usecase';
-import { GenerateTokensUseCase } from './use-cases/generate-tokens.usecase';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
 
 type SignInBody = {
   email: string;
@@ -32,7 +33,7 @@ export class AuthController {
     private readonly signInUseCase: SignInUseCase,
     private readonly authenticateByGoogleUseCase: AuthenticateByGoogleUseCase,
     private readonly envService: EnvService,
-    private readonly generateTokensUseCase: GenerateTokensUseCase,
+    private readonly refreshTokenUseCase: RefreshTokenUseCase,
   ) {}
 
   private readonly logger: Logger = new Logger(AuthController.name);
@@ -65,12 +66,11 @@ export class AuthController {
   @Public()
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const { user } = req;
-
-    const result = await this.authenticateByGoogleUseCase.execute(
-      user as GoogleUser,
-    );
+  async googleAuthRedirect(
+    @CurrentUser() user: GoogleUser,
+    @Res() res: Response,
+  ) {
+    const result = await this.authenticateByGoogleUseCase.execute(user);
 
     if (result.isLeft()) {
       throw new BadRequestException('Falha ao autenticar com o Google');
@@ -85,20 +85,27 @@ export class AuthController {
     return res.redirect(this.envService.get('FRONTEND_URL'));
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
-  async refresh(@CurrentUser('sub') userId: string, @Res() res: Response) {
-    const result = await this.generateTokensUseCase.execute(userId);
+  async refresh(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies['refreshToken'] as string;
+
+    const result = await this.refreshTokenUseCase.execute(refreshToken);
 
     if (result.isLeft()) {
-      throw new BadRequestException('Invalid refresh token or user');
+      const error = result.value;
+      if (error instanceof UnauthorizedException) {
+        throw new UnauthorizedException(error.message);
+      }
+      throw new BadRequestException(error.message);
     }
 
-    const { accessToken, refreshToken } = result.value;
+    const { accessToken, refreshToken: newRefreshToken } = result.value;
 
-    this.setAuthCookies(res, accessToken, refreshToken);
+    this.setAuthCookies(res, accessToken, newRefreshToken);
 
-    return { message: 'Tokens refreshed' };
+    return res.sendStatus(HttpStatus.OK);
   }
 
   private setAuthCookies(
@@ -109,7 +116,7 @@ export class AuthController {
     const commonOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
+      sameSite: 'lax' as const,
       path: '/',
     };
 

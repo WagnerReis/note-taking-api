@@ -9,6 +9,7 @@ export class MongoCreateUserMapper {
         name: raw.name,
         email: raw.email,
         password: raw.password,
+        refreshToken: raw.refreshToken,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },

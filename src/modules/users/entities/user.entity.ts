@@ -53,7 +53,7 @@ export class User extends Entity<UserProps> {
     const user = new User(
       {
         ...props,
-        refreshToken: '',
+        refreshToken: props.refreshToken || '',
       },
       id,
     );

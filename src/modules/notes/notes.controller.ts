@@ -39,8 +39,6 @@ export class NotesController {
   ) {
     const { title, content, status, tags } = body;
 
-    console.log(this.getNotesUseCase, this.createNoteUseCase);
-
     await this.createNoteUseCase.execute({
       title,
       content,
