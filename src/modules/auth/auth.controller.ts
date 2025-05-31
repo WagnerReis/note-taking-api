@@ -21,6 +21,7 @@ import { AuthenticateByGoogleUseCase } from './use-cases/authenticate-by-google.
 import { GoogleUser } from './use-cases/validate-or-create-google-user.usecase';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
+import { RemoveRefreshTokenUseCase } from './use-cases/remove-refresh-token.usecase';
 
 type SignInBody = {
   email: string;
@@ -34,6 +35,7 @@ export class AuthController {
     private readonly authenticateByGoogleUseCase: AuthenticateByGoogleUseCase,
     private readonly envService: EnvService,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
+    private readonly removeRefreshTokenUseCase: RemoveRefreshTokenUseCase,
   ) {}
 
   private readonly logger: Logger = new Logger(AuthController.name);
@@ -104,6 +106,21 @@ export class AuthController {
     const { accessToken, refreshToken: newRefreshToken } = result.value;
 
     this.setAuthCookies(res, accessToken, newRefreshToken);
+
+    return res.sendStatus(HttpStatus.OK);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(@CurrentUser('sub') userId: string, @Res() res: Response) {
+    const result = await this.removeRefreshTokenUseCase.execute(userId);
+
+    if (result.isLeft()) {
+      throw new BadRequestException(result.value.message);
+    }
+
+    res.clearCookie('authToken');
+    res.clearCookie('refreshToken');
 
     return res.sendStatus(HttpStatus.OK);
   }

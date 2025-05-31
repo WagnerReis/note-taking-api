@@ -15,6 +15,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthenticateByGoogleUseCase } from './use-cases/authenticate-by-google.usecase';
 import { GenerateTokensUseCase } from './use-cases/generate-tokens.usecase';
 import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
+import { RemoveRefreshTokenUseCase } from './use-cases/remove-refresh-token.usecase';
 
 @Module({
   imports: [
@@ -37,8 +38,9 @@ import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
     JwtStrategy,
     SignInUseCase,
     GoogleStrategy,
-    GenerateTokensUseCase,
     RefreshTokenUseCase,
+    GenerateTokensUseCase,
+    RemoveRefreshTokenUseCase,
     AuthenticateByGoogleUseCase,
     ValidateOrCreateGoogleUserUseCase,
     {
