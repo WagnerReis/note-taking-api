@@ -10,6 +10,7 @@ describe('Create notes use case', () => {
       title: 'test',
       content: 'test content',
       status: 'active',
+      tags: ['test', 'test2'],
     });
 
     expect(result.isRight()).toBe(true);
