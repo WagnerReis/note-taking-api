@@ -11,6 +11,7 @@ import {
   Logger,
   BadRequestException,
   UnauthorizedException,
+  UsePipes,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { SignInUseCase } from './use-cases/sing-in.usecase';
@@ -22,11 +23,15 @@ import { GoogleUser } from './use-cases/validate-or-create-google-user.usecase';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
 import { RemoveRefreshTokenUseCase } from './use-cases/remove-refresh-token.usecase';
+import { z } from 'zod';
+import { ZodValidationPipe } from '@/core/pipes/zod-validation.pipe';
 
-type SignInBody = {
-  email: string;
-  password: string;
-};
+const signInBodySchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+type SignInBody = z.infer<typeof signInBodySchema>;
 
 @Controller('auth')
 export class AuthController {
@@ -43,21 +48,37 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
+  @UsePipes(new ZodValidationPipe(signInBodySchema))
   async signIn(@Body() signInBody: SignInBody, @Res() res: Response) {
-    const result = await this.signInUseCase.execute(
-      signInBody.email,
-      signInBody.password,
-    );
+    try {
+      this.logger.log(`Login attempt for email: ${signInBody.email}`);
 
-    if (result.isLeft()) {
-      throw result.value;
+      const result = await this.signInUseCase.execute(
+        signInBody.email,
+        signInBody.password,
+      );
+
+      if (result.isLeft()) {
+        const error = result.value;
+        this.logger.warn(`Login failed for email: ${signInBody.email}`);
+        throw error;
+      }
+
+      const { accessToken, refreshToken } = result.value;
+
+      this.setAuthCookies(res, accessToken, refreshToken);
+
+      this.logger.log(`User successfully logged in: ${signInBody.email}`);
+
+      return res.json({
+        success: true,
+        message: 'Successfully logged in',
+        status: 200,
+      });
+    } catch (error) {
+      this.logger.error(`Login error for email: ${signInBody.email}`);
+      throw error;
     }
-
-    const { accessToken, refreshToken } = result.value;
-
-    this.setAuthCookies(res, accessToken, refreshToken);
-
-    return res.sendStatus(HttpStatus.OK);
   }
 
   @Public()
@@ -112,17 +133,51 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('logout')
-  async logout(@CurrentUser('sub') userId: string, @Res() res: Response) {
-    const result = await this.removeRefreshTokenUseCase.execute(userId);
+  async logout(
+    @CurrentUser('sub') userId: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    try {
+      if (!userId) {
+        throw new UnauthorizedException('User not authenticated');
+      }
 
-    if (result.isLeft()) {
-      throw new BadRequestException(result.value.message);
+      this.logger.log(`User logout initiated: ${userId} from IP: ${req.ip}`);
+
+      // Execute logout use case
+      const result = await this.removeRefreshTokenUseCase.execute(userId);
+
+      if (result.isLeft()) {
+        const error = result.value;
+        this.logger.error(`Logout failed for user ${userId}: ${error.message}`);
+        throw new BadRequestException(error.message);
+      }
+
+      // Clear authentication cookies
+      this.clearAuthCookies(res);
+
+      this.logger.log(`User successfully logged out: ${userId}`);
+
+      return res.json({
+        success: true,
+        message: 'Successfully logged out',
+      });
+    } catch (error) {
+      this.logger.error(`Logout error for user ${userId}: ${error.message}`);
+      throw error;
+    }
+  }
+
+  @Get('me')
+  getProfile(@CurrentUser() user: GoogleUser) {
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
     }
 
-    res.clearCookie('authToken');
-    res.clearCookie('refreshToken');
+    this.logger.log(`Profile requested for user: ${user.email}`);
 
-    return res.sendStatus(HttpStatus.OK);
+    return user;
   }
 
   private setAuthCookies(
@@ -139,5 +194,17 @@ export class AuthController {
 
     res.cookie('authToken', accessToken, commonOptions);
     res.cookie('refreshToken', refreshToken, commonOptions);
+  }
+
+  private clearAuthCookies(res: Response) {
+    const commonOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/',
+    };
+
+    res.clearCookie('authToken', commonOptions);
+    res.clearCookie('refreshToken', commonOptions);
   }
 }

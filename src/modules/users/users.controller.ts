@@ -75,17 +75,15 @@ export class UsersController {
       throw error;
     }
 
-    const { accessToken } = resultSignIn.value;
+    const { accessToken, refreshToken } = resultSignIn.value;
 
-    res.cookie('authToken', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge:
-        Number(this.envService.get('JWT_EXPIRATION')) * 1000 * 60 * 60 * 24,
+    this.setAuthCookies(res, accessToken, refreshToken);
+
+    return res.json({
+      success: true,
+      message: 'Successfully signing up',
+      status: 200,
     });
-
-    return res.sendStatus(HttpStatus.OK);
   }
 
   @Post('change-password')
@@ -115,5 +113,21 @@ export class UsersController {
     }
 
     return res.sendStatus(HttpStatus.OK);
+  }
+
+  private setAuthCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
+    const commonOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/',
+    };
+
+    res.cookie('authToken', accessToken, commonOptions);
+    res.cookie('refreshToken', refreshToken, commonOptions);
   }
 }
