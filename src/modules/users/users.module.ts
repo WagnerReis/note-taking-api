@@ -10,12 +10,14 @@ import { CryptographyModule } from '../cryptography/cryptography.module';
 import { UserRepositoryInterface } from './repositories/user.respository.interface';
 import { GenerateTokensUseCase } from '../auth/use-cases/generate-tokens.usecase';
 import { ChangePasswordUseCase } from './use-cases/change-password.usecase';
+import { CookieManagerModule } from '../cookie/cookie-manager.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     EnvModule,
     CryptographyModule,
+    CookieManagerModule,
   ],
   controllers: [UsersController],
   providers: [

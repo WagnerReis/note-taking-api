@@ -25,6 +25,7 @@ import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
 import { RemoveRefreshTokenUseCase } from './use-cases/remove-refresh-token.usecase';
 import { z } from 'zod';
 import { ZodValidationPipe } from '@/core/pipes/zod-validation.pipe';
+import { CookieManagerInterface } from '@/core/cookie/cookie-manager.interface';
 
 const signInBodySchema = z.object({
   email: z.string().email(),
@@ -41,6 +42,7 @@ export class AuthController {
     private readonly envService: EnvService,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly removeRefreshTokenUseCase: RemoveRefreshTokenUseCase,
+    private readonly cookieManager: CookieManagerInterface,
   ) {}
 
   private readonly logger: Logger = new Logger(AuthController.name);
@@ -66,7 +68,7 @@ export class AuthController {
 
       const { accessToken, refreshToken } = result.value;
 
-      this.setAuthCookies(res, accessToken, refreshToken);
+      this.cookieManager.setAuthCookies(res, accessToken, refreshToken);
 
       this.logger.log(`User successfully logged in: ${signInBody.email}`);
 
@@ -101,7 +103,7 @@ export class AuthController {
 
     const { accessToken, refreshToken } = result.value;
 
-    this.setAuthCookies(res, accessToken, refreshToken);
+    this.cookieManager.setAuthCookies(res, accessToken, refreshToken);
 
     this.logger.log(`Redirecting to ${this.envService.get('FRONTEND_URL')}`);
 
@@ -126,7 +128,7 @@ export class AuthController {
 
     const { accessToken, refreshToken: newRefreshToken } = result.value;
 
-    this.setAuthCookies(res, accessToken, newRefreshToken);
+    this.cookieManager.setAuthCookies(res, accessToken, newRefreshToken);
 
     return res.sendStatus(HttpStatus.OK);
   }
@@ -145,7 +147,6 @@ export class AuthController {
 
       this.logger.log(`User logout initiated: ${userId} from IP: ${req.ip}`);
 
-      // Execute logout use case
       const result = await this.removeRefreshTokenUseCase.execute(userId);
 
       if (result.isLeft()) {
@@ -154,8 +155,7 @@ export class AuthController {
         throw new BadRequestException(error.message);
       }
 
-      // Clear authentication cookies
-      this.clearAuthCookies(res);
+      this.cookieManager.clearAuthCookies(res);
 
       this.logger.log(`User successfully logged out: ${userId}`);
 
@@ -178,33 +178,5 @@ export class AuthController {
     this.logger.log(`Profile requested for user: ${user.email}`);
 
     return user;
-  }
-
-  private setAuthCookies(
-    res: Response,
-    accessToken: string,
-    refreshToken: string,
-  ) {
-    const commonOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/',
-    };
-
-    res.cookie('authToken', accessToken, commonOptions);
-    res.cookie('refreshToken', refreshToken, commonOptions);
-  }
-
-  private clearAuthCookies(res: Response) {
-    const commonOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/',
-    };
-
-    res.clearCookie('authToken', commonOptions);
-    res.clearCookie('refreshToken', commonOptions);
   }
 }

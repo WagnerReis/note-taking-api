@@ -10,6 +10,7 @@ import { CryptographyModule } from './modules/cryptography/cryptography.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { CookieManagerModule } from './modules/cookie/cookie-manager.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     EnvModule,
     AuthModule,
     CryptographyModule,
+    CookieManagerModule,
     MongooseModule.forRootAsync({
       imports: [EnvModule],
       inject: [EnvService],

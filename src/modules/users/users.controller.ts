@@ -13,10 +13,10 @@ import { CreateUserUseCase } from './use-cases/create-user.usecase';
 import { UserAlreadyExistsError } from './use-cases/errors/user-already-exists-error';
 import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
 import { Response } from 'express';
-import { EnvService } from '../env/env.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { ChangePasswordUseCase } from './use-cases/change-password.usecase';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CookieManagerInterface } from '@/core/cookie/cookie-manager.interface';
 
 const createUserBodySchema = z.object({
   email: z.string(),
@@ -38,7 +38,7 @@ export class UsersController {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly signInUseCase: SignInUseCase,
-    private readonly envService: EnvService,
+    private readonly cookieManager: CookieManagerInterface,
   ) {}
 
   @Public()
@@ -77,7 +77,7 @@ export class UsersController {
 
     const { accessToken, refreshToken } = resultSignIn.value;
 
-    this.setAuthCookies(res, accessToken, refreshToken);
+    this.cookieManager.setAuthCookies(res, accessToken, refreshToken);
 
     return res.json({
       success: true,
@@ -113,21 +113,5 @@ export class UsersController {
     }
 
     return res.sendStatus(HttpStatus.OK);
-  }
-
-  private setAuthCookies(
-    res: Response,
-    accessToken: string,
-    refreshToken: string,
-  ) {
-    const commonOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/',
-    };
-
-    res.cookie('authToken', accessToken, commonOptions);
-    res.cookie('refreshToken', refreshToken, commonOptions);
   }
 }

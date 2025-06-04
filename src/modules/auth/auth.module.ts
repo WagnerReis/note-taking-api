@@ -16,11 +16,13 @@ import { AuthenticateByGoogleUseCase } from './use-cases/authenticate-by-google.
 import { GenerateTokensUseCase } from './use-cases/generate-tokens.usecase';
 import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
 import { RemoveRefreshTokenUseCase } from './use-cases/remove-refresh-token.usecase';
+import { CookieManagerModule } from '../cookie/cookie-manager.module';
 
 @Module({
   imports: [
     EnvModule,
     CryptographyModule,
+    CookieManagerModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
       global: true,
