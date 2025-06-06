@@ -1,31 +1,31 @@
+import { CookieManagerInterface } from '@/core/cookie/cookie-manager.interface';
+import { ZodValidationPipe } from '@/core/pipes/zod-validation.pipe';
 import {
+  BadRequestException,
   Body,
   Controller,
-  Post,
+  Get,
   HttpCode,
   HttpStatus,
-  Res,
-  Get,
-  UseGuards,
-  Req,
   Logger,
-  BadRequestException,
+  Post,
+  Req,
+  Res,
   UnauthorizedException,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { SignInUseCase } from './use-cases/sing-in.usecase';
 import { AuthGuard } from '@nestjs/passport';
+import { Request, Response } from 'express';
+import { z } from 'zod';
 import { EnvService } from '../env/env.service';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthenticateByGoogleUseCase } from './use-cases/authenticate-by-google.usecase';
-import { GoogleUser } from './use-cases/validate-or-create-google-user.usecase';
-import { CurrentUser } from './decorators/current-user.decorator';
 import { RefreshTokenUseCase } from './use-cases/refresh-token.usecase';
 import { RemoveRefreshTokenUseCase } from './use-cases/remove-refresh-token.usecase';
-import { z } from 'zod';
-import { ZodValidationPipe } from '@/core/pipes/zod-validation.pipe';
-import { CookieManagerInterface } from '@/core/cookie/cookie-manager.interface';
+import { SignInUseCase } from './use-cases/sing-in.usecase';
+import { GoogleUser } from './use-cases/validate-or-create-google-user.usecase';
 
 const signInBodySchema = z.object({
   email: z.string().email(),
@@ -170,12 +170,12 @@ export class AuthController {
   }
 
   @Get('me')
-  getProfile(@CurrentUser() user: GoogleUser) {
+  getProfile(@CurrentUser() user: { sub: string }) {
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    this.logger.log(`Profile requested for user: ${user.email}`);
+    this.logger.log(`Profile requested for user: ${user.sub}`);
 
     return user;
   }

@@ -3,18 +3,20 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Post,
   Req,
   Res,
 } from '@nestjs/common';
-import { z } from 'zod';
-import { CreateNoteUseCase } from './use-cases/create-note.usecase';
 import { Request, Response } from 'express';
-import { GetNotesUseCase } from './use-cases/get-notes.usecase';
+import { z } from 'zod';
 import { StatusEnum } from './entities/note.entity';
 import { NotePresenter } from './presenters/note-presenter';
+import { CreateNoteUseCase } from './use-cases/create-note.usecase';
+import { DeleteNoteUseCase } from './use-cases/delete-note.usecase';
+import { GetNotesUseCase } from './use-cases/get-notes.usecase';
 
 const createNoteBodySchema = z.object({
   title: z.string(),
@@ -30,6 +32,7 @@ export class NotesController {
   constructor(
     private readonly createNoteUseCase: CreateNoteUseCase,
     private readonly getNotesUseCase: GetNotesUseCase,
+    private readonly deleteNoteUseCase: DeleteNoteUseCase,
   ) {}
 
   @Post()
@@ -62,5 +65,14 @@ export class NotesController {
     }
 
     return res.json(NotePresenter.toResponseList(result.value.notes));
+  }
+
+  @Delete(':id')
+  async delete(@Res() res: Response, @Req() req: Request) {
+    const { id } = req.params;
+
+    await this.deleteNoteUseCase.execute(id);
+
+    return res.sendStatus(HttpStatus.NO_CONTENT);
   }
 }

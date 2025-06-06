@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { NotesController } from './notes.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Note, NoteSchema } from './models/note.model';
-import { CreateNoteUseCase } from './use-cases/create-note.usecase';
-import { GetNotesUseCase } from './use-cases/get-notes.usecase';
+import { NotesController } from './notes.controller';
 import { NoteRepository } from './repositories/note.repository';
 import { NoteRepositoryInterface } from './repositories/note.repository.interface';
+import { CreateNoteUseCase } from './use-cases/create-note.usecase';
+import { DeleteNoteUseCase } from './use-cases/delete-note.usecase';
+import { GetNotesUseCase } from './use-cases/get-notes.usecase';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { NoteRepositoryInterface } from './repositories/note.repository.interfac
     },
     GetNotesUseCase,
     CreateNoteUseCase,
+    DeleteNoteUseCase,
   ],
   exports: [],
 })
