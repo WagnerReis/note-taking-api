@@ -38,7 +38,7 @@ export class InMemoryNotesRepository
   async find(query: QueryProps): Promise<Note[]> {
     const filters = [
       (note: Note) => !query.id || note.id.toString() === query.id,
-      (note: Note) => !query.userId || note.userId === query.userId,
+      (note: Note) => !query.userId || note.userId.toString() === query.userId,
       (note: Note) => !query.status || note.status === query.status,
       (note: Note) =>
         query.isArchived === undefined ||
