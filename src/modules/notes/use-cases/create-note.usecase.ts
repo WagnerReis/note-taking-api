@@ -1,13 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { NoteRepositoryInterface } from '../repositories/note.repository.interface';
-import { Note, StatusEnum } from '../entities/note.entity';
 import { Either, right } from '@/core/either';
+import { Injectable } from '@nestjs/common';
+import { Note, StatusEnum } from '../entities/note.entity';
 import { QueryProps } from '../repositories/note.repository';
+import { NoteRepositoryInterface } from '../repositories/note.repository.interface';
 
 interface CreateNoteBody {
   title: string;
   content: string;
   status: string;
+  userId: string;
   tags: string[];
 }
 
@@ -32,6 +33,7 @@ export class CreateNoteUseCase {
       content,
       status: status as StatusEnum,
       tags,
+      userId: data.userId,
     });
 
     await this.noteRepository.create(note);

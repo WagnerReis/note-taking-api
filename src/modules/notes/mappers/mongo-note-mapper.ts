@@ -1,6 +1,6 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { NoteDocument, Note as NoteModel } from '../models/note.model';
 import { Note } from '../entities/note.entity';
+import { NoteDocument, Note as NoteModel } from '../models/note.model';
 
 export class MongoNoteMapper {
   static toDomain(raw: NoteDocument): Note {
@@ -10,6 +10,7 @@ export class MongoNoteMapper {
         content: raw.content,
         status: raw.status,
         tags: raw.tags,
+        userId: raw.userId,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
@@ -22,6 +23,8 @@ export class MongoNoteMapper {
       content: entity.content,
       status: entity.status,
       tags: entity.tags,
+      userId: entity.userId,
+      archivedAt: entity.archivedAt,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

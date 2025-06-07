@@ -20,6 +20,12 @@ export class Note {
   @Prop({ required: false })
   tags: string[];
 
+  @Prop({ required: true })
+  userId: string;
+
+  @Prop({ required: false, type: Date })
+  archivedAt: Date | undefined;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 
