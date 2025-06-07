@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Put,
   Req,
   Res,
 } from '@nestjs/common';
@@ -23,6 +24,7 @@ import {
 import { CreateNoteUseCase } from './use-cases/create-note.usecase';
 import { DeleteNoteUseCase } from './use-cases/delete-note.usecase';
 import { GetNotesUseCase } from './use-cases/get-notes.usecase';
+import { UpdateNoteUseCase } from './use-cases/update-note.usecase';
 
 const createNoteBodySchema = z.object({
   title: z.string(),
@@ -40,6 +42,7 @@ export class NotesController {
     private readonly getNotesUseCase: GetNotesUseCase,
     private readonly deleteNoteUseCase: DeleteNoteUseCase,
     private readonly archiveNoteUseCase: ArchiveNoteUseCase,
+    private readonly updateNoteUseCase: UpdateNoteUseCase,
   ) {}
 
   @Post()
@@ -96,6 +99,31 @@ export class NotesController {
     const result = await this.archiveNoteUseCase.execute(
       new ArchiveNoteCommand(id, userId),
     );
+
+    if (result.isLeft()) {
+      throw new BadRequestException(result.value.message);
+    }
+
+    return res.sendStatus(HttpStatus.NO_CONTENT);
+  }
+
+  @Put(':id')
+  async update(
+    @CurrentUser('sub') userId: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const { id } = req.params;
+    const { title, content, tags } = req.body;
+
+    const result = await this.updateNoteUseCase.execute({
+      id,
+      data: {
+        title,
+        content,
+        tags,
+      },
+    });
 
     if (result.isLeft()) {
       throw new BadRequestException(result.value.message);

@@ -1,3 +1,4 @@
+import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { BadRequestError } from '@/core/errors/bad-request.error';
 import { ConflictError } from '@/core/errors/conflict.error';
 import { InternalServerError } from '@/core/errors/internal-server.error';
@@ -33,7 +34,7 @@ describe('Archive notes use case', () => {
       content: 'test content',
       status: StatusEnum.ACTIVE,
       tags: ['test', 'test2'],
-      userId: user.id.toString(),
+      userId: user.id,
     });
 
     await inMemoryNotesRepository.create(note);
@@ -68,7 +69,7 @@ describe('Archive notes use case', () => {
       content: 'test content',
       status: StatusEnum.ACTIVE,
       tags: ['test', 'test2'],
-      userId: 'existing-user-id',
+      userId: new UniqueEntityId('existing-user-id'),
     });
 
     await inMemoryNotesRepository.create(note);
@@ -108,7 +109,7 @@ describe('Archive notes use case', () => {
       content: 'test content',
       status: StatusEnum.ACTIVE,
       tags: ['test', 'test2'],
-      userId: 'existing-user-id',
+      userId: new UniqueEntityId('existing-user-id'),
     });
 
     note.archive();
@@ -140,7 +141,7 @@ describe('Archive notes use case', () => {
       content: 'test content',
       status: StatusEnum.ACTIVE,
       tags: ['test', 'test2'],
-      userId: user.id.toString(),
+      userId: user.id,
     });
 
     Object.defineProperty(note, 'archive', {
@@ -183,7 +184,7 @@ describe('Archive notes use case', () => {
       content: 'test content',
       status: StatusEnum.ACTIVE,
       tags: ['test', 'test2'],
-      userId: user.id.toString(),
+      userId: user.id,
     });
 
     await inMemoryNotesRepository.create(note);

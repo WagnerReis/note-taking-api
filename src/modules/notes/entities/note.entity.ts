@@ -10,7 +10,7 @@ interface NoteProps {
   content: string;
   status: StatusEnum;
   tags: string[];
-  userId: string;
+  userId: UniqueEntityId;
   archivedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -21,8 +21,18 @@ export class Note extends Entity<NoteProps> {
     return this.props.title;
   }
 
+  set title(title: string) {
+    this.props.title = title;
+    this.props.updatedAt = new Date();
+  }
+
   get content(): string {
     return this.props.content;
+  }
+
+  set content(content: string) {
+    this.props.content = content;
+    this.props.updatedAt = new Date();
   }
 
   get status(): StatusEnum {
@@ -33,7 +43,12 @@ export class Note extends Entity<NoteProps> {
     return this.props.tags;
   }
 
-  get userId(): string {
+  set tags(tags: string[]) {
+    this.props.tags = tags;
+    this.props.updatedAt = new Date();
+  }
+
+  get userId(): UniqueEntityId {
     return this.props.userId;
   }
 

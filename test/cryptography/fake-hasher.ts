@@ -7,7 +7,6 @@ export class FakeHasher implements HashGenerator, HashGenerator {
   }
 
   compare(plain: string, hash: string): boolean {
-    console.log('aquiiiiiiiiiii');
     return plain.concat('-hashed') === hash;
   }
 }

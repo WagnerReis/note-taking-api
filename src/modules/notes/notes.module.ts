@@ -8,6 +8,7 @@ import { ArchiveNoteUseCase } from './use-cases/archive-note.usecase';
 import { CreateNoteUseCase } from './use-cases/create-note.usecase';
 import { DeleteNoteUseCase } from './use-cases/delete-note.usecase';
 import { GetNotesUseCase } from './use-cases/get-notes.usecase';
+import { UpdateNoteUseCase } from './use-cases/update-note.usecase';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { GetNotesUseCase } from './use-cases/get-notes.usecase';
     CreateNoteUseCase,
     DeleteNoteUseCase,
     ArchiveNoteUseCase,
+    UpdateNoteUseCase,
   ],
   exports: [],
 })

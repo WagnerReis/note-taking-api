@@ -25,7 +25,8 @@ export class NoteRepository implements NoteRepositoryInterface<QueryProps> {
   }
 
   async findById(id: string): Promise<Note | null> {
-    const note = await this.noteModel.findById({ id });
+    const note = await this.noteModel.findById({ _id: id });
+
     if (!note) {
       return null;
     }

@@ -1,4 +1,5 @@
 import { Either, right } from '@/core/either';
+import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { Injectable } from '@nestjs/common';
 import { Note, StatusEnum } from '../entities/note.entity';
 import { QueryProps } from '../repositories/note.repository';
@@ -33,7 +34,7 @@ export class CreateNoteUseCase {
       content,
       status: status as StatusEnum,
       tags,
-      userId: data.userId,
+      userId: new UniqueEntityId(data.userId),
     });
 
     await this.noteRepository.create(note);

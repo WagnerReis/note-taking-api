@@ -43,7 +43,6 @@ export class ArchiveNoteUseCase {
       id: command.noteId,
       userId: command.userId,
     });
-    console.log('rrrrrrrrrr', note);
 
     if (!note) {
       return left(new NoteNotFoundError());
@@ -55,7 +54,7 @@ export class ArchiveNoteUseCase {
 
     try {
       note.archive();
-      console.log(note);
+
       await this.notesRepository.update(note);
 
       if (!note.archivedAt) {
