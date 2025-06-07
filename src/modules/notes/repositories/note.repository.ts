@@ -1,12 +1,16 @@
 import { NoteDocument } from '@/modules/notes/models/note.model';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { Note, StatusEnum } from '../entities/note.entity';
 import { MongoNoteMapper } from '../mappers/mongo-note-mapper';
 import { NoteRepositoryInterface } from './note.repository.interface';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 
 export interface QueryProps {
-  status: StatusEnum;
+  status?: StatusEnum;
+  userId?: string;
+  isArchived?: boolean;
+  tags?: string[];
+  id?: string;
 }
 
 export class NoteRepository implements NoteRepositoryInterface<QueryProps> {
@@ -45,16 +49,26 @@ export class NoteRepository implements NoteRepositoryInterface<QueryProps> {
   }
 
   async find(query: QueryProps): Promise<Note[]> {
-    const notes = await this.noteModel.find(
-      query,
-      {},
-      { cursor: { sort: { createdAt: -1 } } },
-    );
+    try {
+      const { id, ...restQuery } = query;
 
-    if (!notes.length) {
+      const notes = await this.noteModel.find(
+        {
+          ...restQuery,
+          ...(id && { _id: id }),
+        },
+        {},
+        { cursor: { sort: { createdAt: -1 } } },
+      );
+
+      if (!notes.length) {
+        return [];
+      }
+
+      return notes.map((note) => MongoNoteMapper.toDomain(note));
+    } catch (error) {
+      console.log(error);
       return [];
     }
-
-    return notes.map((note) => MongoNoteMapper.toDomain(note));
   }
 }

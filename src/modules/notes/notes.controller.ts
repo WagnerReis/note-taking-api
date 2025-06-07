@@ -6,14 +6,20 @@ import {
   Delete,
   Get,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { StatusEnum } from './entities/note.entity';
 import { NotePresenter } from './presenters/note-presenter';
+import {
+  ArchiveNoteCommand,
+  ArchiveNoteUseCase,
+} from './use-cases/archive-note.usecase';
 import { CreateNoteUseCase } from './use-cases/create-note.usecase';
 import { DeleteNoteUseCase } from './use-cases/delete-note.usecase';
 import { GetNotesUseCase } from './use-cases/get-notes.usecase';
@@ -33,11 +39,13 @@ export class NotesController {
     private readonly createNoteUseCase: CreateNoteUseCase,
     private readonly getNotesUseCase: GetNotesUseCase,
     private readonly deleteNoteUseCase: DeleteNoteUseCase,
+    private readonly archiveNoteUseCase: ArchiveNoteUseCase,
   ) {}
 
   @Post()
   async create(
     @Body(new ZodValidationPipe(createNoteBodySchema)) body: CreateNoteBody,
+    @CurrentUser('sub') userId: string,
     @Res() res: Response,
   ) {
     const { title, content, status, tags } = body;
@@ -47,6 +55,7 @@ export class NotesController {
       content,
       status,
       tags,
+      userId,
     });
 
     return res.sendStatus(HttpStatus.CREATED);
@@ -72,6 +81,25 @@ export class NotesController {
     const { id } = req.params;
 
     await this.deleteNoteUseCase.execute(id);
+
+    return res.sendStatus(HttpStatus.NO_CONTENT);
+  }
+
+  @Patch(':id/archive')
+  async archive(
+    @CurrentUser('sub') userId: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const { id } = req.params;
+
+    const result = await this.archiveNoteUseCase.execute(
+      new ArchiveNoteCommand(id, userId),
+    );
+
+    if (result.isLeft()) {
+      throw new BadRequestException(result.value.message);
+    }
 
     return res.sendStatus(HttpStatus.NO_CONTENT);
   }

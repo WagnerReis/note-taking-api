@@ -36,8 +36,20 @@ export class InMemoryNotesRepository
   }
 
   async find(query: QueryProps): Promise<Note[]> {
-    const notesFound = this.notes.filter(
-      (note) => note.status === query.status,
+    const filters = [
+      (note: Note) => !query.id || note.id.toString() === query.id,
+      (note: Note) => !query.userId || note.userId === query.userId,
+      (note: Note) => !query.status || note.status === query.status,
+      (note: Note) =>
+        query.isArchived === undefined ||
+        note.isArchived() === query.isArchived,
+      (note: Note) =>
+        !query.tags?.length ||
+        note.tags.some((tag) => query.tags?.includes(tag)),
+    ];
+
+    const notesFound = this.notes.filter((note) =>
+      filters.every((filter) => filter(note)),
     );
 
     return Promise.resolve(notesFound);
