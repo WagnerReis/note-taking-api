@@ -5,6 +5,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Patch,
   Post,
@@ -46,6 +47,7 @@ export class NotesController {
   ) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async create(
     @Body(new ZodValidationPipe(createNoteBodySchema)) body: CreateNoteBody,
     @CurrentUser('sub') userId: string,
@@ -53,7 +55,7 @@ export class NotesController {
   ) {
     const { title, content, status, tags } = body;
 
-    await this.createNoteUseCase.execute({
+    const result = await this.createNoteUseCase.execute({
       title,
       content,
       status,
@@ -61,7 +63,11 @@ export class NotesController {
       userId,
     });
 
-    return res.sendStatus(HttpStatus.CREATED);
+    if (result.isLeft()) {
+      throw new BadRequestException(result?.value || 'Internal server error');
+    }
+
+    return res.json(result.value.note);
   }
 
   @Get()
