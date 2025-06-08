@@ -59,7 +59,7 @@ export class NoteRepository implements NoteRepositoryInterface<QueryProps> {
           ...(id && { _id: id }),
         },
         {},
-        { cursor: { sort: { createdAt: -1 } } },
+        { sort: { createdAt: -1 } },
       );
 
       if (!notes.length) {
