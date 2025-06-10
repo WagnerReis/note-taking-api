@@ -19,6 +19,10 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { StatusEnum } from './entities/note.entity';
 import { NotePresenter } from './presenters/note-presenter';
 import {
+  ActivateNoteCommand,
+  ActivateNoteUseCase,
+} from './use-cases/active-note.usecase';
+import {
   ArchiveNoteCommand,
   ArchiveNoteUseCase,
 } from './use-cases/archive-note.usecase';
@@ -44,6 +48,7 @@ export class NotesController {
     private readonly deleteNoteUseCase: DeleteNoteUseCase,
     private readonly archiveNoteUseCase: ArchiveNoteUseCase,
     private readonly updateNoteUseCase: UpdateNoteUseCase,
+    private readonly activateNoteUseCase: ActivateNoteUseCase,
   ) {}
 
   @Post()
@@ -104,6 +109,25 @@ export class NotesController {
 
     const result = await this.archiveNoteUseCase.execute(
       new ArchiveNoteCommand(id, userId),
+    );
+
+    if (result.isLeft()) {
+      throw new BadRequestException(result.value.message);
+    }
+
+    return res.sendStatus(HttpStatus.NO_CONTENT);
+  }
+
+  @Patch(':id/activate')
+  async activate(
+    @CurrentUser('sub') userId: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const { id } = req.params;
+
+    const result = await this.activateNoteUseCase.execute(
+      new ActivateNoteCommand(id, userId),
     );
 
     if (result.isLeft()) {

@@ -63,6 +63,10 @@ export class Note extends Entity<NoteProps> {
     return this.props.archivedAt;
   }
 
+  isActive(): boolean {
+    return this.props.status === StatusEnum.ACTIVE;
+  }
+
   isArchived(): boolean {
     return this.props.status === StatusEnum.ARCHIVED;
   }
@@ -71,6 +75,12 @@ export class Note extends Entity<NoteProps> {
     this.props.status = StatusEnum.ARCHIVED;
     this.props.archivedAt = new Date();
     this.props.updatedAt = new Date();
+  }
+
+  activate() {
+    this.props.status = StatusEnum.ACTIVE;
+    this.props.updatedAt = new Date();
+    this.props.archivedAt = undefined;
   }
 
   static create(props: NoteProps, id?: UniqueEntityId) {
