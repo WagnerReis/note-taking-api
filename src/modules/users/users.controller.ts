@@ -1,22 +1,23 @@
+import { CookieManagerInterface } from '@/core/cookie/cookie-manager.interface';
 import { ZodValidationPipe } from '@/core/pipes/zod-validation.pipe';
 import {
-  Controller,
-  Post,
+  BadRequestException,
   Body,
   ConflictException,
-  BadRequestException,
-  Res,
+  Controller,
+  HttpCode,
   HttpStatus,
+  Post,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { z } from 'zod';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
+import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
+import { ChangePasswordUseCase } from './use-cases/change-password.usecase';
 import { CreateUserUseCase } from './use-cases/create-user.usecase';
 import { UserAlreadyExistsError } from './use-cases/errors/user-already-exists-error';
-import { SignInUseCase } from '../auth/use-cases/sing-in.usecase';
-import { Response } from 'express';
-import { Public } from '../auth/decorators/public.decorator';
-import { ChangePasswordUseCase } from './use-cases/change-password.usecase';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { CookieManagerInterface } from '@/core/cookie/cookie-manager.interface';
 
 const createUserBodySchema = z.object({
   email: z.string(),
@@ -57,12 +58,11 @@ export class UsersController {
     if (result.isLeft()) {
       const error = result.value;
 
-      switch (error.constructor) {
-        case UserAlreadyExistsError:
-          throw new ConflictException(error.message);
-        default:
-          throw new BadRequestException(error.message);
+      if (error instanceof UserAlreadyExistsError) {
+        throw new ConflictException(error.message);
       }
+
+      throw new BadRequestException('An error occurred');
     }
 
     const { user } = result.value;
@@ -86,6 +86,7 @@ export class UsersController {
     });
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('change-password')
   async changePassword(
     @CurrentUser('sub') userId: string,
@@ -104,14 +105,16 @@ export class UsersController {
     if (result.isLeft()) {
       const error = result.value;
 
-      switch (error.constructor) {
-        case UserAlreadyExistsError:
-          throw new ConflictException(error.message);
-        default:
-          throw new BadRequestException(error.message);
+      if (error instanceof UserAlreadyExistsError) {
+        throw new ConflictException(error.message);
       }
+
+      throw new BadRequestException('An error occurred');
     }
 
-    return res.sendStatus(HttpStatus.OK);
+    return res.json({
+      statusCode: 200,
+      message: 'Update password with success',
+    });
   }
 }
