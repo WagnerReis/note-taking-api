@@ -1,7 +1,7 @@
 import { InMemoryNotesRepository } from 'test/repositories/in-memory-note.repository';
+import { StatusEnum } from '../entities/note.entity';
 import { CreateNoteUseCase } from './create-note.usecase';
 import { GetNotesUseCase } from './get-notes.usecase';
-import { StatusEnum } from '../entities/note.entity';
 
 const inMemoryNotesRepository = new InMemoryNotesRepository();
 const SUT = new GetNotesUseCase(inMemoryNotesRepository);
@@ -13,12 +13,16 @@ describe('Create notes use case', () => {
       title: 'test1',
       content: 'test content 1',
       status: 'active',
+      tags: [],
+      userId: 'user-id',
     });
 
     await createNoteUseCase.execute({
       title: 'test2',
       content: 'test content 2',
       status: 'archived',
+      tags: [],
+      userId: 'user-id',
     });
 
     const result = await SUT.execute({ status: StatusEnum.ACTIVE });
