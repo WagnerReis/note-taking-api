@@ -17,7 +17,7 @@ export class Note {
   @Prop({ required: true, enum: StatusEnum })
   status: StatusEnum;
 
-  @Prop({ required: false })
+  @Prop({ required: false, type: [String] })
   tags: string[];
 
   @Prop({ required: true })

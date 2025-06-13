@@ -72,4 +72,9 @@ export class NoteRepository implements NoteRepositoryInterface<QueryProps> {
       return [];
     }
   }
+
+  async findTags(): Promise<string[]> {
+    const tags = await this.noteModel.distinct('tags');
+    return tags;
+  }
 }

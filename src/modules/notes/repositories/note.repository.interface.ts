@@ -3,4 +3,5 @@ import { Note } from '../entities/note.entity';
 
 export abstract class NoteRepositoryInterface<T> extends BaseRepository<Note> {
   abstract find(query: T): Promise<Note[]>;
+  abstract findTags(): Promise<string[]>;
 }

@@ -54,4 +54,9 @@ export class InMemoryNotesRepository
 
     return Promise.resolve(notesFound);
   }
+
+  async findTags(): Promise<string[]> {
+    const tags = this.notes.flatMap((note) => note.tags);
+    return Promise.resolve(tags);
+  }
 }
